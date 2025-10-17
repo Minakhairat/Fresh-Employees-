@@ -103,6 +103,7 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            margin-bottom: 15px;
         }
         
         .qr-btn:hover {
@@ -110,27 +111,38 @@
             transform: translateY(-2px);
         }
 
-        #qr-reader {
+        #qr-scanner {
             width: 100%;
-            max-width: 400px;
-            margin: 20px auto;
-            border: 2px solid #FF0000;
+            max-width: 300px;
+            margin: 0 auto;
+            display: none;
+        }
+
+        #qr-video {
+            width: 100%;
             border-radius: 10px;
-            overflow: hidden;
+            border: 3px solid #FF0000;
         }
 
-        #qr-reader__dashboard_section {
-            background: #FF0000;
+        #qr-result {
+            margin-top: 15px;
             padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            color: #FF0000;
+            font-weight: bold;
         }
 
-        #qr-reader__dashboard_section_swaplink {
-            color: white !important;
+        .camera-permission {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 14px;
         }
     </style>
-    
-    <!-- مكتبة QR Code Scanner -->
-    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -154,14 +166,26 @@
                 📷 مسح QR Code
             </button>
             
-            <div id="qr-reader" style="display: none;"></div>
-            <div id="qr-result" style="margin-top: 10px; color: #FF0000; font-weight: bold;"></div>
+            <div class="camera-permission">
+                ⚠️ سيتم طلب إذن استخدام الكاميرا
+            </div>
+            
+            <div id="qr-scanner">
+                <video id="qr-video" playsinline></video>
+            </div>
+            <div id="qr-result"></div>
         </div>
     </div>
 
+    <!-- مكتبة JsQR -->
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+
     <script>
-        let qrScanner = null;
-        let isScannerActive = false;
+        let video = null;
+        let canvas = null;
+        let context = null;
+        let isScanning = false;
+        let scanInterval = null;
 
         function searchEmployee() {
             const code = document.getElementById('employeeCode').value.trim();
@@ -173,78 +197,114 @@
             
             window.location.href = `employees/${code}.html`;
         }
-        
-        function toggleQRScanner() {
-            const qrReader = document.getElementById('qr-reader');
+
+        async function toggleQRScanner() {
+            const scanner = document.getElementById('qr-scanner');
+            const result = document.getElementById('qr-result');
             const qrBtn = document.querySelector('.qr-btn');
-            
-            if (!isScannerActive) {
-                startQRScanner();
-                qrBtn.innerHTML = '🛑 إيقاف المسح';
-                qrReader.style.display = 'block';
-                isScannerActive = true;
+
+            if (!isScanning) {
+                // تشغيل الماسح
+                try {
+                    await startQRScanner();
+                    scanner.style.display = 'block';
+                    qrBtn.innerHTML = '🛑 إيقاف المسح';
+                    result.innerHTML = '🔍 جاري المسح...';
+                    isScanning = true;
+                } catch (error) {
+                    result.innerHTML = '❌ خطأ في تشغيل الكاميرا: ' + error.message;
+                }
             } else {
+                // إيقاف الماسح
                 stopQRScanner();
+                scanner.style.display = 'none';
                 qrBtn.innerHTML = '📷 مسح QR Code';
-                qrReader.style.display = 'none';
-                isScannerActive = false;
+                result.innerHTML = '';
+                isScanning = false;
             }
         }
-        
-        function startQRScanner() {
-            const qrResult = document.getElementById('qr-result');
-            
-            qrScanner = new Html5Qrcode("qr-reader");
-            
-            const config = {
-                fps: 10,
-                qrbox: { width: 250, height: 250 }
-            };
-            
-            qrScanner.start(
-                { facingMode: "environment" },
-                config,
-                onScanSuccess,
-                onScanFailure
-            ).catch(err => {
-                console.error(err);
-                qrResult.innerHTML = "❌ خطأ في تشغيل الكاميرا";
+
+        async function startQRScanner() {
+            const video = document.getElementById('qr-video');
+            const result = document.getElementById('qr-result');
+
+            // طلب إذن الكاميرا
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    facingMode: "environment",
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                } 
             });
+
+            video.srcObject = stream;
+            await video.play();
+
+            // إنشاء canvas للتحليل
+            canvas = document.createElement('canvas');
+            context = canvas.getContext('2d');
+
+            // بدء المسح
+            scanInterval = setInterval(() => {
+                if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    
+                    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                    const code = jsQR(imageData.data, imageData.width, imageData.height);
+                    
+                    if (code) {
+                        result.innerHTML = `✅ تم مسح الكود: ${code.data}`;
+                        result.style.color = '#28a745';
+                        
+                        // الانتقال لصفحة العامل بعد ثانيتين
+                        setTimeout(() => {
+                            window.location.href = `employees/${code.data}.html`;
+                        }, 2000);
+                        
+                        stopQRScanner();
+                    }
+                }
+            }, 100);
         }
-        
+
         function stopQRScanner() {
-            if (qrScanner) {
-                qrScanner.stop().then(() => {
-                    qrScanner.clear();
-                    document.getElementById('qr-result').innerHTML = "";
-                }).catch(err => {
-                    console.error(err);
-                });
+            if (scanInterval) {
+                clearInterval(scanInterval);
+                scanInterval = null;
             }
-        }
-        
-        function onScanSuccess(decodedText, decodedResult) {
-            document.getElementById('qr-result').innerHTML = `✅ تم مسح الكود: ${decodedText}`;
             
-            setTimeout(() => {
-                window.location.href = `employees/${decodedText}.html`;
-            }, 2000);
+            const video = document.getElementById('qr-video');
+            if (video && video.srcObject) {
+                const tracks = video.srcObject.getTracks();
+                tracks.forEach(track => track.stop());
+                video.srcObject = null;
+            }
             
-            stopQRScanner();
-            document.querySelector('.qr-btn').innerHTML = '📷 مسح QR Code';
-            document.getElementById('qr-reader').style.display = 'none';
-            isScannerActive = false;
+            const qrBtn = document.querySelector('.qr-btn');
+            if (qrBtn) {
+                qrBtn.innerHTML = '📷 مسح QR Code';
+            }
+            
+            const scanner = document.getElementById('qr-scanner');
+            if (scanner) {
+                scanner.style.display = 'none';
+            }
+            
+            isScanning = false;
         }
-        
-        function onScanFailure(error) {
-            // يمكن تركها فارغة
-        }
-        
+
+        // السماح بالبحث عند الضغط على Enter
         document.getElementById('employeeCode').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 searchEmployee();
             }
         });
+
+        // تنظيف الموارد عند مغادرة الصفحة
+        window.addEventListener('beforeunload', stopQRScanner);
     </script>
 </body>
 </html>
