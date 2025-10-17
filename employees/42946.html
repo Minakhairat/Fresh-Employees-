@@ -1,15 +1,4 @@
 <!DOCTYPE html>
-<html lang="en">
-
-  <head>
-    <meta charset="UTF-8">
-    <title>42946</title>
-    
-
-  </head>
-    
-  <body>
-  <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -29,10 +18,31 @@
         }
         
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, rgba(255, 0, 0, 0.9) 0%, rgba(204, 0, 0, 0.9) 100%), 
+                        url('https://raw.githubusercontent.com/Minakhairat/fresh-employees/refs/heads/main/Fresh_Electric%20(1).jpg');
+            background-size: cover;
+            background-position: center;
+            background-blend-mode: overlay;
             color: white;
-            padding: 30px 20px;
+            padding: 40px 20px;
             text-align: center;
+            position: relative;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 0, 0, 0.8);
+            z-index: 1;
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 2;
         }
         
         .employee-photo {
@@ -42,16 +52,19 @@
             border: 5px solid white;
             margin-bottom: 15px;
             object-fit: cover;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
         
         .employee-name {
             font-size: 28px;
             margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
         
         .employee-code {
             font-size: 18px;
             opacity: 0.9;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
         
         .container {
@@ -66,12 +79,13 @@
             padding: 25px;
             margin-bottom: 20px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-right: 4px solid #FF0000;
         }
         
         .card h2 {
-            color: #333;
+            color: #FF0000;
             margin-bottom: 15px;
-            border-bottom: 2px solid #667eea;
+            border-bottom: 2px solid #FF0000;
             padding-bottom: 10px;
         }
         
@@ -84,12 +98,18 @@
             margin-bottom: 8px;
             padding: 10px 15px;
             border-radius: 5px;
-            border-right: 4px solid #667eea;
+            border-right: 4px solid #FF0000;
+            transition: all 0.3s ease;
+        }
+        
+        .skills-list li:hover, .certificates-list li:hover, .courses-list li:hover {
+            background: #ffe6e6;
+            transform: translateX(-5px);
         }
         
         .professional-level {
             display: inline-block;
-            background: #28a745;
+            background: #FF0000;
             color: white;
             padding: 5px 15px;
             border-radius: 20px;
@@ -98,84 +118,93 @@
         
         .back-btn {
             display: inline-block;
-            background: #667eea;
+            background: #FF0000;
             color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
+            padding: 12px 25px;
+            border-radius: 25px;
             text-decoration: none;
             margin-top: 20px;
             transition: all 0.3s ease;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
         }
         
         .back-btn:hover {
-            background: #764ba2;
+            background: #CC0000;
             transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.3);
+        }
+
+        .info-item {
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .info-item strong {
+            color: #FF0000;
         }
     </style>
 </head>
 <body>
-    <div class="header" style="position: relative;">
-    <a href="../index.html" style="position: absolute; top: 15px; left: 15px; background: rgba(255,255,255,0.2); padding: 8px; border-radius: 50%;">
-        <img src="https://raw.githubusercontent.com/Minakhairat/fresh-employees/refs/heads/main/Fresh_Electric%20(1).jpg" 
-             alt="فريش" 
-             style="width: 40px; height: 40px; border-radius: 50%;">
-    </a>
-        <img src="https://raw.githubusercontent.com/Minakhairat/fresh-employees/refs/heads/main/assets/images/employees/42946.jpg" 
-             alt="مينا خيرت" 
-             class="employee-photo">
-        <h1 class="employee-name">مينا خيرت شوقي كامل</h1>
-        <p class="employee-code">الكود: 42946</p>
+    <div class="header">
+        <div class="header-content">
+            <img src="https://raw.githubusercontent.com/Minakhairat/fresh-employees/main/assets/images/employees/42946.jpg" 
+                 alt="مينا خيرت" 
+                 class="employee-photo">
+            <h1 class="employee-name">مينا خيرت شوقي كامل</h1>
+            <p class="employee-code">الكود: 42946</p>
+        </div>
     </div>
     
     <div class="container">
         <div class="card">
             <h2>📊 المعلومات الأساسية</h2>
-            <p><strong>القسم:</strong> إدارة العمليات</p>
-            <p><strong>الوظيفة:</strong> مدير إدارة العمليات</p>
-            <p><strong>تاريخ التعيين:</strong> ١٠/٠٣/٢٠٢٢</p>
+            <div class="info-item"><strong>القسم:</strong> إدارة العمليات</div>
+            <div class="info-item"><strong>الوظيفة:</strong> مدير إدارة العمليات</div>
+            <div class="info-item"><strong>تاريخ التعيين:</strong> ١٠/٠٣/٢٠٢٢</div>
         </div>
         
         <div class="card">
             <h2>🛠️ المهارات الفنية</h2>
             <ul class="skills-list">
-                <li>تركيب وتجميع المبردات الصحراوية</li>
-                <li>فحص الجودة النهائية</li>
-                <li>صيانة المكونات الكهربائية</li>
-                <li>قراءة المخططات الفنية</li>
-                <li>استخدام أدوات القياس الدقيقة</li>
+                <li>إدارة وتخطيط العمليات الإنتاجية</li>
+                <li>تحسين كفاءة خطوط الإنتاج</li>
+                <li>إدارة فرق العمل (٣٠٠ عامل)</li>
+                <li>مراقبة الجودة والشهادة</li>
+                <li>تطوير نظم العمل والإجراءات</li>
             </ul>
         </div>
         
         <div class="card">
             <h2>📜 الشهادات</h2>
             <ul class="certificates-list">
-                <li>شهادة فني تكييف من مركز التدريب المهني - ٢٠٢١</li>
+                <li>شهادة إدارة العمليات والإنتاج - ٢٠٢١</li>
                 <li>شهادة السلامة والصحة المهنية - ٢٠٢٢</li>
                 <li>شهادة الجودة في التصنيع - ٢٠٢٣</li>
+                <li>شهادة إدارة الجودة الشاملة - ٢٠٢٤</li>
             </ul>
         </div>
         
         <div class="card">
             <h2>🎓 الكورسات والدورات</h2>
             <ul class="courses-list">
-                <li>دورة أساسيات الكهرباء الصناعية - ٤٠ ساعة</li>
-                <li>دورة ضبط الجودة في خطوط الإنتاج - ٣٠ ساعة</li>
-                <li>ورشة تحسين كفاءة الطاقة في الأجهزة - ٢٠ ساعة</li>
+                <li>دورة القيادة الإدارية المتقدمة - ٦٠ ساعة</li>
+                <li>دورة إدارة الجودة في المصانع - ٤٠ ساعة</li>
+                <li>ورشة تحسين كفاءة الطاقة في التصنيع - ٣٠ ساعة</li>
+                <li>برنامج إدارة سلاسل التوريد - ٥٠ ساعة</li>
             </ul>
         </div>
         
         <div class="card">
             <h2>📈 المستوى المهني</h2>
-            <p>المستوى الحالي: <span class="professional-level">مستوى متقدم</span></p>
-            <p>التقييم الأخير: ⭐⭐⭐⭐⭐ (٤.٨/٥)</p>
+            <p>المستوى الحالي: <span class="professional-level">مدير إدارة</span></p>
+            <p>التقييم الأخير: ⭐⭐⭐⭐⭐ (٥/٥)</p>
             <p>آخر ترقية: يناير ٢٠٢٤</p>
         </div>
         
-        <a href="../index.html" class="back-btn">← العودة للبحث</a>
+        <button onclick="window.location.href='../index.html'" class="back-btn">← العودة للصفحة الرئيسية</button>
     </div>
 </body>
-</html>
-    
-  </body>
-  
 </html>
