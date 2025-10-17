@@ -21,15 +21,17 @@
             padding: 20px;
         }
         
+        .main-container {
+            width: 100%;
+            max-width: 500px;
+        }
+        
         .container {
             background: white;
             border-radius: 15px;
             padding: 40px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-            width: 100%;
-            max-width: 500px;
             text-align: center;
-            position: relative;
         }
         
         .logo {
@@ -130,119 +132,71 @@
             background: #545b62;
         }
 
-        #barcode-scanner {
+        #qr-reader {
             width: 100%;
-            max-width: 300px;
-            height: 200px;
-            margin: 15px auto;
-            display: none;
-            position: relative;
-            overflow: hidden;
+            max-width: 400px;
+            margin: 20px auto;
+            border: 2px solid #FF0000;
             border-radius: 10px;
-            border: 3px solid #FF0000;
-            background: #000;
+            overflow: hidden;
         }
 
-        #barcode-video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .scan-line {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
+        #qr-reader__dashboard_section {
             background: #FF0000;
-            animation: scan 1.5s infinite linear;
-            box-shadow: 0 0 10px #FF0000;
-            z-index: 10;
+            padding: 10px;
         }
 
-        @keyframes scan {
-            0% { top: 0; }
-            100% { top: 100%; }
+        #qr-reader__dashboard_section_swaplink {
+            color: white !important;
         }
 
-        #barcode-result {
-            margin-top: 15px;
-            padding: 12px;
-            background: #f8f9fa;
-            border-radius: 8px;
+        #qr-result {
+            margin-top: 10px;
             color: #FF0000;
             font-weight: bold;
-            border-right: 4px solid #FF0000;
-            min-height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .success-message {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
-            animation: pulse 1s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-            100% { transform: scale(1); }
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
         }
     </style>
+    
+    <!-- مكتبة QR Code Scanner -->
+    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <img src="https://raw.githubusercontent.com/Minakhairat/fresh-employees/refs/heads/main/Fresh_Electric%20(1).jpg" 
-             alt="فريش" 
-             class="logo">
-        <h1>نظام إدارة العمال - مصنع المبرد الصحراوي</h1>
-        
-        <div class="search-box">
-            <input type="text" 
-                   class="search-input" 
-                   id="employeeCode"
-                   placeholder="أدخل الكود الشخصي للعامل...">
-            <button class="search-btn" onclick="searchEmployee()">
-                🔍
-            </button>
-        </div>
-        
-        <div class="barcode-section">
-            <div class="barcode-buttons">
-                <button class="barcode-btn" onclick="toggleBarcodeScanner()">
-                    📷 مسح باركود
-                </button>
-                <button class="barcode-btn secondary" onclick="document.getElementById('barcode-file').click()">
-                    📁 رفع صورة
+    <div class="main-container">
+        <div class="container">
+            <img src="https://raw.githubusercontent.com/Minakhairat/fresh-employees/refs/heads/main/Fresh_Electric%20(1).jpg" 
+                 alt="فريش" 
+                 class="logo">
+            <h1>نظام إدارة العمال - مصنع المبرد الصحراوي</h1>
+            
+            <div class="search-box">
+                <input type="text" 
+                       class="search-input" 
+                       id="employeeCode"
+                       placeholder="أدخل الكود الشخصي للعامل...">
+                <button class="search-btn" onclick="searchEmployee()">
+                    🔍
                 </button>
             </div>
             
-            <div id="barcode-scanner">
-                <video id="barcode-video" playsinline></video>
-                <div class="scan-line"></div>
+            <div class="barcode-section">
+                <div class="barcode-buttons">
+                    <button class="barcode-btn" onclick="toggleQRScanner()">
+                        📷 مسح باركود
+                    </button>
+                </div>
+                
+                <div id="qr-reader" style="display: none;"></div>
+                <div id="qr-result"></div>
             </div>
-            
-            <input type="file" 
-                   id="barcode-file" 
-                   accept="image/*" 
-                   style="display: none;"
-                   onchange="scanBarcodeFromImage(this.files[0])">
-            
-            <div id="barcode-result"></div>
         </div>
     </div>
 
-    <!-- مكتبة ZXing - الأكثر دقة للباركود -->
-    <script src="https://unpkg.com/@zxing/library@0.19.1"></script>
-
     <script>
-        let codeReader = null;
-        let isScanning = false;
-        let videoStream = null;
+        let qrScanner = null;
+        let isScannerActive = false;
 
         function searchEmployee() {
             const code = document.getElementById('employeeCode').value.trim();
@@ -254,148 +208,82 @@
             
             window.location.href = `employees/${code}.html`;
         }
-
-        async function toggleBarcodeScanner() {
-            const scanner = document.getElementById('barcode-scanner');
-            const result = document.getElementById('barcode-result');
-            const barcodeBtn = document.querySelector('.barcode-buttons .barcode-btn:first-child');
-
-            if (!isScanning) {
-                try {
-                    await startBarcodeScanner();
-                    scanner.style.display = 'block';
-                    barcodeBtn.innerHTML = '🛑 إيقاف المسح';
-                    result.innerHTML = 'جاري المسح...';
-                    isScanning = true;
-                } catch (error) {
-                    result.innerHTML = '❌ خطأ في تشغيل الكاميرا';
-                    console.error('Camera error:', error);
-                }
+        
+        function toggleQRScanner() {
+            const qrReader = document.getElementById('qr-reader');
+            const qrBtn = document.querySelector('.barcode-btn');
+            
+            if (!isScannerActive) {
+                startQRScanner();
+                qrBtn.innerHTML = '🛑 إيقاف المسح';
+                qrReader.style.display = 'block';
+                isScannerActive = true;
             } else {
-                stopBarcodeScanner();
-                scanner.style.display = 'none';
-                barcodeBtn.innerHTML = '📷 مسح باركود';
-                result.innerHTML = '';
-                isScanning = false;
+                stopQRScanner();
+                qrBtn.innerHTML = '📷 مسح باركود';
+                qrReader.style.display = 'none';
+                isScannerActive = false;
             }
         }
-
-        async function startBarcodeScanner() {
-            const video = document.getElementById('barcode-video');
+        
+        function startQRScanner() {
+            const qrResult = document.getElementById('qr-result');
             
-            // إيقاف أي كاميرا سابقة
-            if (videoStream) {
-                videoStream.getTracks().forEach(track => track.stop());
-            }
-
-            // طلب إذن الكاميرا
-            videoStream = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode: "environment",
-                    width: { ideal: 640 },
-                    height: { ideal: 480 }
-                }
+            qrScanner = new Html5Qrcode("qr-reader");
+            
+            const config = {
+                fps: 10,
+                qrbox: { width: 250, height: 250 },
+                supportedScanTypes: [
+                    Html5QrcodeScanType.SCAN_TYPE_QR_CODE,
+                    Html5QrcodeScanType.SCAN_TYPE_BARCODE
+                ]
+            };
+            
+            qrScanner.start(
+                { facingMode: "environment" },
+                config,
+                onScanSuccess,
+                onScanFailure
+            ).catch(err => {
+                console.error(err);
+                qrResult.innerHTML = "❌ خطأ في تشغيل الكاميرا";
             });
-
-            video.srcObject = videoStream;
-            await video.play();
-
-            // تهيئة قارئ الباركود
-            if (!codeReader) {
-                codeReader = new ZXing.BrowserMultiFormatReader();
-            }
-
-            // بدء المسح
-            codeReader.decodeFromVideoElement(video)
-                .then(result => {
-                    if (result) {
-                        const resultElement = document.getElementById('barcode-result');
-                        resultElement.innerHTML = `✅ تم مسح الكود: ${result.getText()}`;
-                        resultElement.className = 'success-message';
-                        
-                        // الانتقال لصفحة العامل بعد ثانية واحدة
-                        setTimeout(() => {
-                            window.location.href = `employees/${result.getText()}.html`;
-                        }, 1000);
-                        
-                        stopBarcodeScanner();
-                    }
-                })
-                .catch(err => {
-                    // تجاهل الأخطاء العادية أثناء المسح
-                    if (!err.message.includes('NotFoundError')) {
-                        console.log('Scanning...');
-                    }
+        }
+        
+        function stopQRScanner() {
+            if (qrScanner) {
+                qrScanner.stop().then(() => {
+                    qrScanner.clear();
+                    document.getElementById('qr-result').innerHTML = "";
+                }).catch(err => {
+                    console.error(err);
                 });
+            }
         }
-
-        function stopBarcodeScanner() {
-            if (codeReader) {
-                codeReader.reset();
-            }
+        
+        function onScanSuccess(decodedText, decodedResult) {
+            document.getElementById('qr-result').innerHTML = `✅ تم مسح الكود: ${decodedText}`;
             
-            if (videoStream) {
-                videoStream.getTracks().forEach(track => track.stop());
-                videoStream = null;
-            }
+            setTimeout(() => {
+                window.location.href = `employees/${decodedText}.html`;
+            }, 2000);
             
-            const video = document.getElementById('barcode-video');
-            if (video) {
-                video.srcObject = null;
-            }
-            
-            const barcodeBtn = document.querySelector('.barcode-buttons .barcode-btn:first-child');
-            if (barcodeBtn) {
-                barcodeBtn.innerHTML = '📷 مسح باركود';
-            }
-            
-            const scanner = document.getElementById('barcode-scanner');
-            if (scanner) {
-                scanner.style.display = 'none';
-            }
-            
-            isScanning = false;
+            stopQRScanner();
+            document.querySelector('.barcode-btn').innerHTML = '📷 مسح باركود';
+            document.getElementById('qr-reader').style.display = 'none';
+            isScannerActive = false;
         }
-
-        function scanBarcodeFromImage(file) {
-            if (!file) return;
-            
-            const result = document.getElementById('barcode-result');
-            result.innerHTML = 'جاري تحليل الصورة...';
-            result.className = '';
-            
-            if (!codeReader) {
-                codeReader = new ZXing.BrowserMultiFormatReader();
-            }
-
-            codeReader.decodeFromImage(file)
-                .then(decodedResult => {
-                    result.innerHTML = `✅ تم مسح الكود: ${decodedResult.getText()}`;
-                    result.className = 'success-message';
-                    
-                    setTimeout(() => {
-                        window.location.href = `employees/${decodedResult.getText()}.html`;
-                    }, 1000);
-                })
-                .catch(err => {
-                    result.innerHTML = '❌ لم يتم العثور على باركود في الصورة';
-                    console.error('Decode error:', err);
-                })
-                .finally(() => {
-                    document.getElementById('barcode-file').value = '';
-                });
+        
+        function onScanFailure(error) {
+            // يمكن تركها فارغة
         }
-
-        // السماح بالبحث عند الضغط على Enter
+        
         document.getElementById('employeeCode').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 searchEmployee();
             }
         });
-
-        // تنظيف الموارد
-        window.addEventListener('beforeunload', stopBarcodeScanner);
-        window.addEventListener('pagehide', stopBarcodeScanner);
     </script>
 </body>
 </html>
