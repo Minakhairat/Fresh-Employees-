@@ -29,6 +29,7 @@
             width: 100%;
             max-width: 500px;
             text-align: center;
+            position: relative;
         }
         
         .logo {
@@ -132,32 +133,47 @@
         #barcode-scanner {
             width: 100%;
             max-width: 300px;
+            height: 250px;
             margin: 15px auto;
             display: none;
             position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            border: 3px solid #FF0000;
+            background: #000;
         }
 
         #barcode-video {
             width: 100%;
-            border-radius: 10px;
-            border: 3px solid #FF0000;
+            height: 100%;
+            object-fit: cover;
         }
 
         .scan-line {
             position: absolute;
-            top: 50%;
+            top: 0;
             left: 0;
             right: 0;
             height: 2px;
             background: #FF0000;
             animation: scan 2s infinite linear;
             box-shadow: 0 0 10px #FF0000;
+            z-index: 10;
         }
 
         @keyframes scan {
-            0% { top: 10%; }
-            50% { top: 90%; }
-            100% { top: 10%; }
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+
+        .scanner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 5;
         }
 
         #barcode-result {
@@ -174,26 +190,6 @@
             justify-content: center;
         }
 
-        .camera-permission {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            color: #856404;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
-            font-size: 14px;
-        }
-
-        .barcode-instructions {
-            background: #d1ecf1;
-            border: 1px solid #bee5eb;
-            color: #0c5460;
-            padding: 8px 12px;
-            border-radius: 5px;
-            margin: 8px 0;
-            font-size: 12px;
-        }
-
         .success-message {
             background: #d4edda;
             border: 1px solid #c3e6cb;
@@ -207,68 +203,56 @@
             100% { transform: scale(1); }
         }
 
-        .supported-formats {
-            background: #e2e3e5;
-            border: 1px solid #d6d8db;
-            color: #383d41;
-            padding: 8px;
-            border-radius: 5px;
-            margin: 5px 0;
-            font-size: 11px;
+        /* إصلاح حجم الكونتينر علشان ميختلفش */
+        .fixed-container {
+            width: 100%;
+            max-width: 500px;
+            transition: all 0.3s ease;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <img src="https://raw.githubusercontent.com/Minakhairat/fresh-employees/refs/heads/main/Fresh_Electric%20(1).jpg" 
-             alt="فريش" 
-             class="logo">
-        <h1>نظام إدارة العمال - مصنع المبرد الصحراوي</h1>
-        
-        <div class="search-box">
-            <input type="text" 
-                   class="search-input" 
-                   id="employeeCode"
-                   placeholder="أدخل الكود الشخصي للعامل...">
-            <button class="search-btn" onclick="searchEmployee()">
-                🔍
-            </button>
-        </div>
-        
-        <div class="barcode-section">
-            <div class="barcode-buttons">
-                <button class="barcode-btn" onclick="toggleBarcodeScanner()">
-                    📷 مسح باركود بالكاميرا
-                </button>
-                <button class="barcode-btn secondary" onclick="document.getElementById('barcode-file').click()">
-                    📁 رفع صورة باركود
+    <div class="fixed-container">
+        <div class="container">
+            <img src="https://raw.githubusercontent.com/Minakhairat/fresh-employees/refs/heads/main/Fresh_Electric%20(1).jpg" 
+                 alt="فريش" 
+                 class="logo">
+            <h1>نظام إدارة العمال - مصنع المبرد الصحراوي</h1>
+            
+            <div class="search-box">
+                <input type="text" 
+                       class="search-input" 
+                       id="employeeCode"
+                       placeholder="أدخل الكود الشخصي للعامل...">
+                <button class="search-btn" onclick="searchEmployee()">
+                    🔍
                 </button>
             </div>
             
-            <div class="camera-permission">
-                ⚠️ للكاميرا: سيتم طلب إذن استخدام الكاميرا
+            <div class="barcode-section">
+                <div class="barcode-buttons">
+                    <button class="barcode-btn" onclick="toggleBarcodeScanner()">
+                        📷 مسح باركود
+                    </button>
+                    <button class="barcode-btn secondary" onclick="document.getElementById('barcode-file').click()">
+                        📁 رفع صورة
+                    </button>
+                </div>
+                
+                <div id="barcode-scanner">
+                    <video id="barcode-video" playsinline></video>
+                    <div class="scan-line"></div>
+                    <div class="scanner-overlay"></div>
+                </div>
+                
+                <input type="file" 
+                       id="barcode-file" 
+                       accept="image/*" 
+                       style="display: none;"
+                       onchange="scanBarcodeFromImage(this.files[0])">
+                
+                <div id="barcode-result"></div>
             </div>
-            
-            <div class="barcode-instructions">
-                💡 وجه الكاميرا نحو الباركود حتى يتم مسحه تلقائياً
-            </div>
-
-            <div class="supported-formats">
-                📋 يدعم: Code128, Code39, EAN-13, UPC-A
-            </div>
-            
-            <div id="barcode-scanner">
-                <video id="barcode-video" playsinline></video>
-                <div class="scan-line"></div>
-            </div>
-            
-            <input type="file" 
-                   id="barcode-file" 
-                   accept="image/*" 
-                   style="display: none;"
-                   onchange="scanBarcodeFromImage(this.files[0])">
-            
-            <div id="barcode-result"></div>
         </div>
     </div>
 
@@ -277,7 +261,6 @@
 
     <script>
         let isScanning = false;
-        let barcodeScanner = null;
 
         function searchEmployee() {
             const code = document.getElementById('employeeCode').value.trim();
@@ -300,18 +283,17 @@
                 try {
                     await startBarcodeScanner();
                     scanner.style.display = 'block';
-                    barcodeBtn.innerHTML = '🛑 إيقاف الكاميرا';
-                    result.innerHTML = '🔍 جاري المسح... ركز الكاميرا على الباركود';
+                    barcodeBtn.innerHTML = '🛑 إيقاف المسح';
+                    result.innerHTML = 'جاري المسح...';
                     isScanning = true;
                 } catch (error) {
-                    result.innerHTML = '❌ خطأ في تشغيل الكاميرا: ' + error.message;
-                    console.error('Camera error:', error);
+                    result.innerHTML = '❌ خطأ في تشغيل الكاميرا';
                 }
             } else {
                 // إيقاف الماسح
                 stopBarcodeScanner();
                 scanner.style.display = 'none';
-                barcodeBtn.innerHTML = '📷 مسح باركود بالكاميرا';
+                barcodeBtn.innerHTML = '📷 مسح باركود';
                 result.innerHTML = '';
                 isScanning = false;
             }
@@ -327,9 +309,15 @@
                         type: "LiveStream",
                         target: scannerElement,
                         constraints: {
-                            width: 640,
-                            height: 480,
+                            width: 300,
+                            height: 250,
                             facingMode: "environment"
+                        },
+                        area: {
+                            top: "0%",
+                            right: "0%",
+                            left: "0%", 
+                            bottom: "0%"
                         }
                     },
                     decoder: {
@@ -343,7 +331,9 @@
                     locator: {
                         patchSize: "medium",
                         halfSample: true
-                    }
+                    },
+                    numOfWorkers: 2,
+                    frequency: 10
                 }, function(err) {
                     if (err) {
                         reject(err);
@@ -358,40 +348,15 @@
                     const code = result.codeResult.code;
                     if (code) {
                         const resultElement = document.getElementById('barcode-result');
-                        resultElement.innerHTML = `✅ تم مسح الباركود: <strong>${code}</strong>`;
+                        resultElement.innerHTML = `✅ تم مسح الكود: ${code}`;
                         resultElement.className = 'success-message';
-                        resultElement.style.color = '#155724';
                         
-                        // الانتقال لصفحة العامل بعد ثانيتين
+                        // الانتقال لصفحة العامل بعد ثانية واحدة
                         setTimeout(() => {
                             window.location.href = `employees/${code}.html`;
-                        }, 2000);
+                        }, 1000);
                         
                         stopBarcodeScanner();
-                    }
-                });
-
-                Quagga.onProcessed(function(result) {
-                    const drawingCtx = Quagga.canvas.ctx.overlay;
-                    const drawingCanvas = Quagga.canvas.dom.overlay;
-
-                    if (result) {
-                        if (result.boxes) {
-                            drawingCtx.clearRect(0, 0, parseInt(drawingCanvas.getAttribute("width")), parseInt(drawingCanvas.getAttribute("height")));
-                            result.boxes.filter(function(box) {
-                                return box !== result.box;
-                            }).forEach(function(box) {
-                                Quagga.ImageDebug.drawPath(box, {x: 0, y: 1}, drawingCtx, {color: "green", lineWidth: 2});
-                            });
-                        }
-
-                        if (result.box) {
-                            Quagga.ImageDebug.drawPath(result.box, {x: 0, y: 1}, drawingCtx, {color: "#00F", lineWidth: 2});
-                        }
-
-                        if (result.codeResult && result.codeResult.code) {
-                            Quagga.ImageDebug.drawPath(result.line, {x: 'x', y: 'y'}, drawingCtx, {color: 'red', lineWidth: 3});
-                        }
                     }
                 });
             });
@@ -404,7 +369,7 @@
             
             const barcodeBtn = document.querySelector('.barcode-buttons .barcode-btn:first-child');
             if (barcodeBtn) {
-                barcodeBtn.innerHTML = '📷 مسح باركود بالكاميرا';
+                barcodeBtn.innerHTML = '📷 مسح باركود';
             }
             
             const scanner = document.getElementById('barcode-scanner');
@@ -419,8 +384,7 @@
             if (!file) return;
             
             const result = document.getElementById('barcode-result');
-            result.innerHTML = '🔍 جاري تحليل الصورة...';
-            result.style.color = '#FF0000';
+            result.innerHTML = 'جاري تحليل الصورة...';
             result.className = '';
             
             Quagga.decodeSingle({
@@ -437,16 +401,14 @@
             }, function(result) {
                 if (result && result.codeResult) {
                     const code = result.codeResult.code;
-                    result.innerHTML = `✅ تم مسح الباركود: <strong>${code}</strong>`;
+                    result.innerHTML = `✅ تم مسح الكود: ${code}`;
                     result.className = 'success-message';
-                    result.style.color = '#155724';
                     
                     setTimeout(() => {
                         window.location.href = `employees/${code}.html`;
-                    }, 1500);
+                    }, 1000);
                 } else {
-                    result.innerHTML = '❌ لم يتم العثور على باركود في الصورة';
-                    result.style.color = '#dc3545';
+                    result.innerHTML = '❌ لم يتم العثور على باركود';
                 }
                 
                 // تنظيف الـ input file
