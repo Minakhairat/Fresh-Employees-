@@ -192,12 +192,6 @@
             50% { transform: scale(1.02); }
             100% { transform: scale(1); }
         }
-
-        .test-barcode {
-            margin-top: 10px;
-            font-size: 12px;
-            color: #666;
-        }
     </style>
 </head>
 <body>
@@ -239,23 +233,16 @@
                    onchange="scanBarcodeFromImage(this.files[0])">
             
             <div id="barcode-result"></div>
-
-            <!-- للاختبار فقط -->
-            <div class="test-barcode">
-                💡 للاختبار: استخدم أي تطبيق باركود مولد لعمل باركود للرقم "42946"
-            </div>
         </div>
     </div>
 
-    <!-- مكتبة BarcodeDetector - الحديثة والأفضل -->
-    <script>
-        // تحقق إذا المتصفح يدعم BarcodeDetector
-        const isBarcodeDetectorSupported = 'BarcodeDetector' in window;
-        console.log('BarcodeDetector supported:', isBarcodeDetectorSupported);
+    <!-- مكتبة ZXing - الأكثر دقة للباركود -->
+    <script src="https://unpkg.com/@zxing/library@0.19.1"></script>
 
-        let videoStream = null;
+    <script>
+        let codeReader = null;
         let isScanning = false;
-        let scanInterval = null;
+        let videoStream = null;
 
         function searchEmployee() {
             const code = document.getElementById('employeeCode').value.trim();
@@ -296,66 +283,55 @@
         async function startBarcodeScanner() {
             const video = document.getElementById('barcode-video');
             
+            // إيقاف أي كاميرا سابقة
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+            }
+
             // طلب إذن الكاميرا
             videoStream = await navigator.mediaDevices.getUserMedia({
                 video: {
                     facingMode: "environment",
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 }
+                    width: { ideal: 640 },
+                    height: { ideal: 480 }
                 }
             });
 
             video.srcObject = videoStream;
             await video.play();
 
-            // بدء المسح
-            startBarcodeDetection(video);
-        }
-
-        function startBarcodeDetection(video) {
-            if (!isBarcodeDetectorSupported) {
-                document.getElementById('barcode-result').innerHTML = 
-                    '❌ المتصفح لا يدعم مسح الباركود. جرب Chrome أو Edge.';
-                return;
+            // تهيئة قارئ الباركود
+            if (!codeReader) {
+                codeReader = new ZXing.BrowserMultiFormatReader();
             }
 
-            const barcodeDetector = new BarcodeDetector({
-                formats: ['code_128', 'code_39', 'ean_13', 'upc_a']
-            });
-
-            scanInterval = setInterval(async () => {
-                if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                    try {
-                        const barcodes = await barcodeDetector.detect(video);
+            // بدء المسح
+            codeReader.decodeFromVideoElement(video)
+                .then(result => {
+                    if (result) {
+                        const resultElement = document.getElementById('barcode-result');
+                        resultElement.innerHTML = `✅ تم مسح الكود: ${result.getText()}`;
+                        resultElement.className = 'success-message';
                         
-                        if (barcodes.length > 0) {
-                            const barcode = barcodes[0];
-                            const code = barcode.rawValue;
-                            
-                            if (code) {
-                                const resultElement = document.getElementById('barcode-result');
-                                resultElement.innerHTML = `✅ تم مسح الكود: ${code}`;
-                                resultElement.className = 'success-message';
-                                
-                                // الانتقال لصفحة العامل بعد ثانية واحدة
-                                setTimeout(() => {
-                                    window.location.href = `employees/${code}.html`;
-                                }, 1000);
-                                
-                                stopBarcodeScanner();
-                            }
-                        }
-                    } catch (error) {
-                        console.log('No barcode detected');
+                        // الانتقال لصفحة العامل بعد ثانية واحدة
+                        setTimeout(() => {
+                            window.location.href = `employees/${result.getText()}.html`;
+                        }, 1000);
+                        
+                        stopBarcodeScanner();
                     }
-                }
-            }, 500); // فحص كل نصف ثانية
+                })
+                .catch(err => {
+                    // تجاهل الأخطاء العادية أثناء المسح
+                    if (!err.message.includes('NotFoundError')) {
+                        console.log('Scanning...');
+                    }
+                });
         }
 
         function stopBarcodeScanner() {
-            if (scanInterval) {
-                clearInterval(scanInterval);
-                scanInterval = null;
+            if (codeReader) {
+                codeReader.reset();
             }
             
             if (videoStream) {
@@ -381,47 +357,33 @@
             isScanning = false;
         }
 
-        async function scanBarcodeFromImage(file) {
+        function scanBarcodeFromImage(file) {
             if (!file) return;
             
             const result = document.getElementById('barcode-result');
             result.innerHTML = 'جاري تحليل الصورة...';
             result.className = '';
             
-            if (!isBarcodeDetectorSupported) {
-                result.innerHTML = '❌ المتصفح لا يدعم مسح الباركود';
-                document.getElementById('barcode-file').value = '';
-                return;
+            if (!codeReader) {
+                codeReader = new ZXing.BrowserMultiFormatReader();
             }
 
-            const barcodeDetector = new BarcodeDetector({
-                formats: ['code_128', 'code_39', 'ean_13', 'upc_a']
-            });
-
-            const img = new Image();
-            img.onload = async function() {
-                try {
-                    const barcodes = await barcodeDetector.detect(img);
+            codeReader.decodeFromImage(file)
+                .then(decodedResult => {
+                    result.innerHTML = `✅ تم مسح الكود: ${decodedResult.getText()}`;
+                    result.className = 'success-message';
                     
-                    if (barcodes.length > 0) {
-                        const code = barcodes[0].rawValue;
-                        result.innerHTML = `✅ تم مسح الكود: ${code}`;
-                        result.className = 'success-message';
-                        
-                        setTimeout(() => {
-                            window.location.href = `employees/${code}.html`;
-                        }, 1000);
-                    } else {
-                        result.innerHTML = '❌ لم يتم العثور على باركود';
-                    }
-                } catch (error) {
-                    result.innerHTML = '❌ خطأ في تحليل الصورة';
-                }
-                
-                document.getElementById('barcode-file').value = '';
-            };
-            
-            img.src = URL.createObjectURL(file);
+                    setTimeout(() => {
+                        window.location.href = `employees/${decodedResult.getText()}.html`;
+                    }, 1000);
+                })
+                .catch(err => {
+                    result.innerHTML = '❌ لم يتم العثور على باركود في الصورة';
+                    console.error('Decode error:', err);
+                })
+                .finally(() => {
+                    document.getElementById('barcode-file').value = '';
+                });
         }
 
         // السماح بالبحث عند الضغط على Enter
@@ -433,6 +395,7 @@
 
         // تنظيف الموارد
         window.addEventListener('beforeunload', stopBarcodeScanner);
+        window.addEventListener('pagehide', stopBarcodeScanner);
     </script>
 </body>
 </html>
