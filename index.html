@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <title>Untitled</title>
+    
+
+  </head>
+    
+  <body>
+  <!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فريش - نظام إدارة العمال</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+        
+        .logo {
+            width: 120px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 15px 50px 15px 20px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+        
+        .search-btn {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #667eea;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .search-btn:hover {
+            background: #764ba2;
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .qr-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .qr-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .qr-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="assets/images/logo.png" alt="فريش" class="logo">
+        <h1>نظام إدارة العمال - مصنع المبرد الصحراوي</h1>
+        
+        <div class="search-box">
+            <input type="text" 
+                   class="search-input" 
+                   id="employeeCode"
+                   placeholder="أدخل الكود الشخصي للعامل...">
+            <button class="search-btn" onclick="searchEmployee()">
+                🔍
+            </button>
+        </div>
+        
+        <div class="qr-section">
+            <button class="qr-btn" onclick="startQRScanner()">
+                📷 مسح QR Code
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // دالة البحث عن العامل
+        function searchEmployee() {
+            const code = document.getElementById('employeeCode').value.trim();
+            
+            if (!code) {
+                alert('يرجى إدخال الكود الشخصي');
+                return;
+            }
+            
+            // التوجه لصفحة العامل
+            window.location.href = `employees/${code}.html`;
+        }
+        
+        // دالة مسح QR Code
+        function startQRScanner() {
+            alert('سيتم تفعيل الكاميرا لمسح QR Code - هذه الخاصية تحت التطوير');
+            // هنا سيتم إضافة كود QR Scanner لاحقاً
+        }
+        
+        // السماح بالبحث عند الضغط على Enter
+        document.getElementById('employeeCode').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchEmployee();
+            }
+        });
+    </script>
+</body>
+</html>
+    
+  </body>
+  
+</html>
