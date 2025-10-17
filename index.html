@@ -3,7 +3,7 @@
 
   <head>
     <meta charset="UTF-8">
-    <title>Untitled</title>
+    <title>42946</title>
     
 
   </head>
@@ -14,7 +14,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>فريش - نظام إدارة العمال</title>
+    <title>العامل محمد أحمد - فريش</title>
     <style>
         * {
             box-sizing: border-box;
@@ -24,147 +24,150 @@
         
         body {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+            background: #f5f5f5;
+            line-height: 1.6;
         }
         
-        .container {
-            background: white;
-            border-radius: 15px;
-            padding: 40px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 500px;
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
             text-align: center;
         }
         
-        .logo {
-            width: 120px;
-            margin-bottom: 20px;
-        }
-        
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
-            font-size: 28px;
-        }
-        
-        .search-box {
-            position: relative;
-            margin-bottom: 20px;
-        }
-        
-        .search-input {
-            width: 100%;
-            padding: 15px 50px 15px 20px;
-            border: 2px solid #ddd;
-            border-radius: 25px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-        
-        .search-input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
-        }
-        
-        .search-btn {
-            position: absolute;
-            left: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: #667eea;
-            border: none;
+        .employee-photo {
+            width: 150px;
+            height: 150px;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            border: 5px solid white;
+            margin-bottom: 15px;
+            object-fit: cover;
         }
         
-        .search-btn:hover {
-            background: #764ba2;
-            transform: translateY(-50%) scale(1.1);
+        .employee-name {
+            font-size: 28px;
+            margin-bottom: 5px;
         }
         
-        .qr-section {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
+        .employee-code {
+            font-size: 18px;
+            opacity: 0.9;
         }
         
-        .qr-btn {
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .card h2 {
+            color: #333;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .skills-list, .certificates-list, .courses-list {
+            list-style: none;
+        }
+        
+        .skills-list li, .certificates-list li, .courses-list li {
+            background: #f8f9fa;
+            margin-bottom: 8px;
+            padding: 10px 15px;
+            border-radius: 5px;
+            border-right: 4px solid #667eea;
+        }
+        
+        .professional-level {
+            display: inline-block;
             background: #28a745;
             color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 25px;
-            font-size: 16px;
-            cursor: pointer;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        
+        .back-btn {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-top: 20px;
             transition: all 0.3s ease;
         }
         
-        .qr-btn:hover {
-            background: #218838;
+        .back-btn:hover {
+            background: #764ba2;
             transform: translateY(-2px);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <img src="assets/images/logo.png" alt="فريش" class="logo">
-        <h1>نظام إدارة العمال - مصنع المبرد الصحراوي</h1>
-        
-        <div class="search-box">
-            <input type="text" 
-                   class="search-input" 
-                   id="employeeCode"
-                   placeholder="أدخل الكود الشخصي للعامل...">
-            <button class="search-btn" onclick="searchEmployee()">
-                🔍
-            </button>
-        </div>
-        
-        <div class="qr-section">
-            <button class="qr-btn" onclick="startQRScanner()">
-                📷 مسح QR Code
-            </button>
-        </div>
+    <div class="header">
+        <img src="../../assets/images/employees/001.jpg" 
+             alt="محمد أحمد" 
+             class="employee-photo">
+        <h1 class="employee-name">محمد أحمد علي</h1>
+        <p class="employee-code">الكود: 001</p>
     </div>
-
-    <script>
-        // دالة البحث عن العامل
-        function searchEmployee() {
-            const code = document.getElementById('employeeCode').value.trim();
-            
-            if (!code) {
-                alert('يرجى إدخال الكود الشخصي');
-                return;
-            }
-            
-            // التوجه لصفحة العامل
-            window.location.href = `employees/${code}.html`;
-        }
+    
+    <div class="container">
+        <div class="card">
+            <h2>📊 المعلومات الأساسية</h2>
+            <p><strong>القسم:</strong> تصنيع المبردات الصحراوية</p>
+            <p><strong>الوظيفة:</strong> فني تركيب وتجميع</p>
+            <p><strong>تاريخ التعيين:</strong> ١٠/٠٣/٢٠٢٢</p>
+        </div>
         
-        // دالة مسح QR Code
-        function startQRScanner() {
-            alert('سيتم تفعيل الكاميرا لمسح QR Code - هذه الخاصية تحت التطوير');
-            // هنا سيتم إضافة كود QR Scanner لاحقاً
-        }
+        <div class="card">
+            <h2>🛠️ المهارات الفنية</h2>
+            <ul class="skills-list">
+                <li>تركيب وتجميع المبردات الصحراوية</li>
+                <li>فحص الجودة النهائية</li>
+                <li>صيانة المكونات الكهربائية</li>
+                <li>قراءة المخططات الفنية</li>
+                <li>استخدام أدوات القياس الدقيقة</li>
+            </ul>
+        </div>
         
-        // السماح بالبحث عند الضغط على Enter
-        document.getElementById('employeeCode').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                searchEmployee();
-            }
-        });
-    </script>
+        <div class="card">
+            <h2>📜 الشهادات</h2>
+            <ul class="certificates-list">
+                <li>شهادة فني تكييف من مركز التدريب المهني - ٢٠٢١</li>
+                <li>شهادة السلامة والصحة المهنية - ٢٠٢٢</li>
+                <li>شهادة الجودة في التصنيع - ٢٠٢٣</li>
+            </ul>
+        </div>
+        
+        <div class="card">
+            <h2>🎓 الكورسات والدورات</h2>
+            <ul class="courses-list">
+                <li>دورة أساسيات الكهرباء الصناعية - ٤٠ ساعة</li>
+                <li>دورة ضبط الجودة في خطوط الإنتاج - ٣٠ ساعة</li>
+                <li>ورشة تحسين كفاءة الطاقة في الأجهزة - ٢٠ ساعة</li>
+            </ul>
+        </div>
+        
+        <div class="card">
+            <h2>📈 المستوى المهني</h2>
+            <p>المستوى الحالي: <span class="professional-level">مستوى متقدم</span></p>
+            <p>التقييم الأخير: ⭐⭐⭐⭐⭐ (٤.٨/٥)</p>
+            <p>آخر ترقية: يناير ٢٠٢٤</p>
+        </div>
+        
+        <a href="../index.html" class="back-btn">← العودة للبحث</a>
+    </div>
 </body>
 </html>
     
