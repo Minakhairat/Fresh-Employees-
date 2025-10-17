@@ -85,52 +85,93 @@
             transform: translateY(-50%) scale(1.1);
         }
         
-        .qr-section {
+        .barcode-section {
             margin-top: 30px;
             padding-top: 20px;
             border-top: 1px solid #eee;
         }
         
-        .qr-btn {
+        .barcode-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        
+        .barcode-btn {
             background: #FF0000;
             color: white;
             border: none;
-            padding: 12px 25px;
+            padding: 12px 20px;
             border-radius: 25px;
-            font-size: 16px;
+            font-size: 14px;
             cursor: pointer;
             transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            margin-bottom: 15px;
+            flex: 1;
+            min-width: 140px;
+            justify-content: center;
         }
         
-        .qr-btn:hover {
+        .barcode-btn:hover {
             background: #CC0000;
             transform: translateY(-2px);
         }
 
-        #qr-scanner {
-            width: 100%;
-            max-width: 300px;
-            margin: 0 auto;
-            display: none;
+        .barcode-btn.secondary {
+            background: #6c757d;
         }
 
-        #qr-video {
+        .barcode-btn.secondary:hover {
+            background: #545b62;
+        }
+
+        #barcode-scanner {
+            width: 100%;
+            max-width: 300px;
+            margin: 15px auto;
+            display: none;
+            position: relative;
+        }
+
+        #barcode-video {
             width: 100%;
             border-radius: 10px;
             border: 3px solid #FF0000;
         }
 
-        #qr-result {
+        .scan-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #FF0000;
+            animation: scan 2s infinite linear;
+            box-shadow: 0 0 10px #FF0000;
+        }
+
+        @keyframes scan {
+            0% { top: 10%; }
+            50% { top: 90%; }
+            100% { top: 10%; }
+        }
+
+        #barcode-result {
             margin-top: 15px;
-            padding: 10px;
+            padding: 12px;
             background: #f8f9fa;
-            border-radius: 5px;
+            border-radius: 8px;
             color: #FF0000;
             font-weight: bold;
+            border-right: 4px solid #FF0000;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .camera-permission {
@@ -141,6 +182,39 @@
             border-radius: 5px;
             margin: 10px 0;
             font-size: 14px;
+        }
+
+        .barcode-instructions {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            padding: 8px 12px;
+            border-radius: 5px;
+            margin: 8px 0;
+            font-size: 12px;
+        }
+
+        .success-message {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        .supported-formats {
+            background: #e2e3e5;
+            border: 1px solid #d6d8db;
+            color: #383d41;
+            padding: 8px;
+            border-radius: 5px;
+            margin: 5px 0;
+            font-size: 11px;
         }
     </style>
 </head>
@@ -161,31 +235,49 @@
             </button>
         </div>
         
-        <div class="qr-section">
-            <button class="qr-btn" onclick="toggleQRScanner()">
-                📷 مسح QR Code
-            </button>
+        <div class="barcode-section">
+            <div class="barcode-buttons">
+                <button class="barcode-btn" onclick="toggleBarcodeScanner()">
+                    📷 مسح باركود بالكاميرا
+                </button>
+                <button class="barcode-btn secondary" onclick="document.getElementById('barcode-file').click()">
+                    📁 رفع صورة باركود
+                </button>
+            </div>
             
             <div class="camera-permission">
-                ⚠️ سيتم طلب إذن استخدام الكاميرا
+                ⚠️ للكاميرا: سيتم طلب إذن استخدام الكاميرا
             </div>
             
-            <div id="qr-scanner">
-                <video id="qr-video" playsinline></video>
+            <div class="barcode-instructions">
+                💡 وجه الكاميرا نحو الباركود حتى يتم مسحه تلقائياً
             </div>
-            <div id="qr-result"></div>
+
+            <div class="supported-formats">
+                📋 يدعم: Code128, Code39, EAN-13, UPC-A
+            </div>
+            
+            <div id="barcode-scanner">
+                <video id="barcode-video" playsinline></video>
+                <div class="scan-line"></div>
+            </div>
+            
+            <input type="file" 
+                   id="barcode-file" 
+                   accept="image/*" 
+                   style="display: none;"
+                   onchange="scanBarcodeFromImage(this.files[0])">
+            
+            <div id="barcode-result"></div>
         </div>
     </div>
 
-    <!-- مكتبة JsQR -->
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+    <!-- مكتبة QuaggaJS للباركود -->
+    <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
 
     <script>
-        let video = null;
-        let canvas = null;
-        let context = null;
         let isScanning = false;
-        let scanInterval = null;
+        let barcodeScanner = null;
 
         function searchEmployee() {
             const code = document.getElementById('employeeCode').value.trim();
@@ -198,102 +290,168 @@
             window.location.href = `employees/${code}.html`;
         }
 
-        async function toggleQRScanner() {
-            const scanner = document.getElementById('qr-scanner');
-            const result = document.getElementById('qr-result');
-            const qrBtn = document.querySelector('.qr-btn');
+        async function toggleBarcodeScanner() {
+            const scanner = document.getElementById('barcode-scanner');
+            const result = document.getElementById('barcode-result');
+            const barcodeBtn = document.querySelector('.barcode-buttons .barcode-btn:first-child');
 
             if (!isScanning) {
                 // تشغيل الماسح
                 try {
-                    await startQRScanner();
+                    await startBarcodeScanner();
                     scanner.style.display = 'block';
-                    qrBtn.innerHTML = '🛑 إيقاف المسح';
-                    result.innerHTML = '🔍 جاري المسح...';
+                    barcodeBtn.innerHTML = '🛑 إيقاف الكاميرا';
+                    result.innerHTML = '🔍 جاري المسح... ركز الكاميرا على الباركود';
                     isScanning = true;
                 } catch (error) {
                     result.innerHTML = '❌ خطأ في تشغيل الكاميرا: ' + error.message;
+                    console.error('Camera error:', error);
                 }
             } else {
                 // إيقاف الماسح
-                stopQRScanner();
+                stopBarcodeScanner();
                 scanner.style.display = 'none';
-                qrBtn.innerHTML = '📷 مسح QR Code';
+                barcodeBtn.innerHTML = '📷 مسح باركود بالكاميرا';
                 result.innerHTML = '';
                 isScanning = false;
             }
         }
 
-        async function startQRScanner() {
-            const video = document.getElementById('qr-video');
-            const result = document.getElementById('qr-result');
-
-            // طلب إذن الكاميرا
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { 
-                    facingMode: "environment",
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 }
-                } 
-            });
-
-            video.srcObject = stream;
-            await video.play();
-
-            // إنشاء canvas للتحليل
-            canvas = document.createElement('canvas');
-            context = canvas.getContext('2d');
-
-            // بدء المسح
-            scanInterval = setInterval(() => {
-                if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
+        function startBarcodeScanner() {
+            return new Promise((resolve, reject) => {
+                const scannerElement = document.getElementById('barcode-scanner');
+                
+                Quagga.init({
+                    inputStream: {
+                        name: "Live",
+                        type: "LiveStream",
+                        target: scannerElement,
+                        constraints: {
+                            width: 640,
+                            height: 480,
+                            facingMode: "environment"
+                        }
+                    },
+                    decoder: {
+                        readers: [
+                            "code_128_reader",
+                            "code_39_reader",
+                            "ean_reader",
+                            "upc_reader"
+                        ]
+                    },
+                    locator: {
+                        patchSize: "medium",
+                        halfSample: true
+                    }
+                }, function(err) {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
                     
-                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                    
-                    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-                    const code = jsQR(imageData.data, imageData.width, imageData.height);
-                    
+                    Quagga.start();
+                    resolve();
+                });
+
+                Quagga.onDetected(function(result) {
+                    const code = result.codeResult.code;
                     if (code) {
-                        result.innerHTML = `✅ تم مسح الكود: ${code.data}`;
-                        result.style.color = '#28a745';
+                        const resultElement = document.getElementById('barcode-result');
+                        resultElement.innerHTML = `✅ تم مسح الباركود: <strong>${code}</strong>`;
+                        resultElement.className = 'success-message';
+                        resultElement.style.color = '#155724';
                         
                         // الانتقال لصفحة العامل بعد ثانيتين
                         setTimeout(() => {
-                            window.location.href = `employees/${code.data}.html`;
+                            window.location.href = `employees/${code}.html`;
                         }, 2000);
                         
-                        stopQRScanner();
+                        stopBarcodeScanner();
                     }
-                }
-            }, 100);
+                });
+
+                Quagga.onProcessed(function(result) {
+                    const drawingCtx = Quagga.canvas.ctx.overlay;
+                    const drawingCanvas = Quagga.canvas.dom.overlay;
+
+                    if (result) {
+                        if (result.boxes) {
+                            drawingCtx.clearRect(0, 0, parseInt(drawingCanvas.getAttribute("width")), parseInt(drawingCanvas.getAttribute("height")));
+                            result.boxes.filter(function(box) {
+                                return box !== result.box;
+                            }).forEach(function(box) {
+                                Quagga.ImageDebug.drawPath(box, {x: 0, y: 1}, drawingCtx, {color: "green", lineWidth: 2});
+                            });
+                        }
+
+                        if (result.box) {
+                            Quagga.ImageDebug.drawPath(result.box, {x: 0, y: 1}, drawingCtx, {color: "#00F", lineWidth: 2});
+                        }
+
+                        if (result.codeResult && result.codeResult.code) {
+                            Quagga.ImageDebug.drawPath(result.line, {x: 'x', y: 'y'}, drawingCtx, {color: 'red', lineWidth: 3});
+                        }
+                    }
+                });
+            });
         }
 
-        function stopQRScanner() {
-            if (scanInterval) {
-                clearInterval(scanInterval);
-                scanInterval = null;
+        function stopBarcodeScanner() {
+            if (Quagga) {
+                Quagga.stop();
             }
             
-            const video = document.getElementById('qr-video');
-            if (video && video.srcObject) {
-                const tracks = video.srcObject.getTracks();
-                tracks.forEach(track => track.stop());
-                video.srcObject = null;
+            const barcodeBtn = document.querySelector('.barcode-buttons .barcode-btn:first-child');
+            if (barcodeBtn) {
+                barcodeBtn.innerHTML = '📷 مسح باركود بالكاميرا';
             }
             
-            const qrBtn = document.querySelector('.qr-btn');
-            if (qrBtn) {
-                qrBtn.innerHTML = '📷 مسح QR Code';
-            }
-            
-            const scanner = document.getElementById('qr-scanner');
+            const scanner = document.getElementById('barcode-scanner');
             if (scanner) {
                 scanner.style.display = 'none';
             }
             
             isScanning = false;
+        }
+
+        function scanBarcodeFromImage(file) {
+            if (!file) return;
+            
+            const result = document.getElementById('barcode-result');
+            result.innerHTML = '🔍 جاري تحليل الصورة...';
+            result.style.color = '#FF0000';
+            result.className = '';
+            
+            Quagga.decodeSingle({
+                decoder: {
+                    readers: [
+                        "code_128_reader",
+                        "code_39_reader", 
+                        "ean_reader",
+                        "upc_reader"
+                    ]
+                },
+                locate: true,
+                src: URL.createObjectURL(file)
+            }, function(result) {
+                if (result && result.codeResult) {
+                    const code = result.codeResult.code;
+                    result.innerHTML = `✅ تم مسح الباركود: <strong>${code}</strong>`;
+                    result.className = 'success-message';
+                    result.style.color = '#155724';
+                    
+                    setTimeout(() => {
+                        window.location.href = `employees/${code}.html`;
+                    }, 1500);
+                } else {
+                    result.innerHTML = '❌ لم يتم العثور على باركود في الصورة';
+                    result.style.color = '#dc3545';
+                }
+                
+                // تنظيف الـ input file
+                document.getElementById('barcode-file').value = '';
+            });
         }
 
         // السماح بالبحث عند الضغط على Enter
@@ -304,7 +462,8 @@
         });
 
         // تنظيف الموارد عند مغادرة الصفحة
-        window.addEventListener('beforeunload', stopQRScanner);
+        window.addEventListener('beforeunload', stopBarcodeScanner);
+        window.addEventListener('pagehide', stopBarcodeScanner);
     </script>
 </body>
 </html>
