@@ -13,7 +13,7 @@
         
         body {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #2E8B57 0%, #3CB371 100%);
+            background: linear-gradient(135deg, #FF0000 0%, #CC0000 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -25,7 +25,7 @@
             background: white;
             border-radius: 15px;
             padding: 40px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
             width: 100%;
             max-width: 500px;
             text-align: center;
@@ -38,7 +38,7 @@
         }
         
         h1 {
-            color: #2E8B57;
+            color: #FF0000;
             margin-bottom: 30px;
             font-size: 28px;
             font-weight: bold;
@@ -60,8 +60,8 @@
         
         .search-input:focus {
             outline: none;
-            border-color: #2E8B57;
-            box-shadow: 0 0 10px rgba(46, 139, 87, 0.3);
+            border-color: #FF0000;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
         }
         
         .search-btn {
@@ -69,7 +69,7 @@
             left: 10px;
             top: 50%;
             transform: translateY(-50%);
-            background: #2E8B57;
+            background: #FF0000;
             border: none;
             border-radius: 50%;
             width: 40px;
@@ -81,7 +81,7 @@
         }
         
         .search-btn:hover {
-            background: #3CB371;
+            background: #CC0000;
             transform: translateY(-50%) scale(1.1);
         }
         
@@ -92,7 +92,7 @@
         }
         
         .qr-btn {
-            background: #2E8B57;
+            background: #FF0000;
             color: white;
             border: none;
             padding: 12px 25px;
@@ -106,7 +106,7 @@
         }
         
         .qr-btn:hover {
-            background: #3CB371;
+            background: #CC0000;
             transform: translateY(-2px);
         }
 
@@ -114,13 +114,13 @@
             width: 100%;
             max-width: 400px;
             margin: 20px auto;
-            border: 2px solid #2E8B57;
+            border: 2px solid #FF0000;
             border-radius: 10px;
             overflow: hidden;
         }
 
         #qr-reader__dashboard_section {
-            background: #2E8B57;
+            background: #FF0000;
             padding: 10px;
         }
 
@@ -155,7 +155,7 @@
             </button>
             
             <div id="qr-reader" style="display: none;"></div>
-            <div id="qr-result" style="margin-top: 10px; color: #2E8B57; font-weight: bold;"></div>
+            <div id="qr-result" style="margin-top: 10px; color: #FF0000; font-weight: bold;"></div>
         </div>
     </div>
 
@@ -163,7 +163,6 @@
         let qrScanner = null;
         let isScannerActive = false;
 
-        // دالة البحث عن العامل
         function searchEmployee() {
             const code = document.getElementById('employeeCode').value.trim();
             
@@ -172,23 +171,19 @@
                 return;
             }
             
-            // التوجه لصفحة العامل
             window.location.href = `employees/${code}.html`;
         }
         
-        // دالة تشغيل/إيقاف QR Scanner
         function toggleQRScanner() {
             const qrReader = document.getElementById('qr-reader');
             const qrBtn = document.querySelector('.qr-btn');
             
             if (!isScannerActive) {
-                // تشغيل الماسح
                 startQRScanner();
                 qrBtn.innerHTML = '🛑 إيقاف المسح';
                 qrReader.style.display = 'block';
                 isScannerActive = true;
             } else {
-                // إيقاف الماسح
                 stopQRScanner();
                 qrBtn.innerHTML = '📷 مسح QR Code';
                 qrReader.style.display = 'none';
@@ -196,7 +191,6 @@
             }
         }
         
-        // بدء QR Scanner
         function startQRScanner() {
             const qrResult = document.getElementById('qr-result');
             
@@ -218,7 +212,6 @@
             });
         }
         
-        // إيقاف QR Scanner
         function stopQRScanner() {
             if (qrScanner) {
                 qrScanner.stop().then(() => {
@@ -230,28 +223,23 @@
             }
         }
         
-        // عند نجاح المسح
         function onScanSuccess(decodedText, decodedResult) {
             document.getElementById('qr-result').innerHTML = `✅ تم مسح الكود: ${decodedText}`;
             
-            // الانتقال لصفحة العامل بعد ثانيتين
             setTimeout(() => {
                 window.location.href = `employees/${decodedText}.html`;
             }, 2000);
             
-            // إيقاف الماسح بعد القراءة
             stopQRScanner();
             document.querySelector('.qr-btn').innerHTML = '📷 مسح QR Code';
             document.getElementById('qr-reader').style.display = 'none';
             isScannerActive = false;
         }
         
-        // عند فشل المسح
         function onScanFailure(error) {
-            // يمكن تركها فارغة أو إضافة رسالة خطأ إذا أردت
+            // يمكن تركها فارغة
         }
         
-        // السماح بالبحث عند الضغط على Enter
         document.getElementById('employeeCode').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 searchEmployee();
